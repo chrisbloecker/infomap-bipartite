@@ -5,6 +5,7 @@
 #include "BiasedMapEquation.h"
 #include "FlowData.h"
 #include "NodeBase.h"
+#include "Pair.h"
 #include "../utils/Log.h"
 #include "../io/Config.h"
 #include <vector>
@@ -17,12 +18,12 @@ namespace infomap {
 
 double BiasedMapEquation::getModuleCodelength() const {
 	// std::cout << "\n$$$$$ getModuleCodelength: " << moduleCodelength << " + " << biasedCost << " = " << moduleCodelength + biasedCost << "\n";
-	return moduleCodelength + biasedCost;
+	return infomath::total(moduleCodelength) + biasedCost;
 };
 
 double BiasedMapEquation::getCodelength() const {
 	// std::cout << "\n$$$$$ getCodelength: " << codelength << " + " << biasedCost << " = " << codelength + biasedCost << "\n";
-	return codelength + biasedCost;
+	return infomath::total(codelength) + biasedCost;
 };
 
 // ===================================================
@@ -30,8 +31,7 @@ double BiasedMapEquation::getCodelength() const {
 // ===================================================
 
 std::ostream& BiasedMapEquation::print(std::ostream& out) const {
-	return out << indexCodelength << " + " << moduleCodelength <<
-		" + " << biasedCost << " = " <<	io::toPrecision(getCodelength());
+	return out << "(" << indexCodelength.first << "," << indexCodelength.second << ") + (" << moduleCodelength.first << "," << moduleCodelength.second << ") + " << biasedCost << " = " << io::toPrecision(getCodelength());
 }
 
 // std::ostream& operator<<(std::ostream& out, const BiasedMapEquation& mapEq) {
@@ -94,7 +94,7 @@ void BiasedMapEquation::calculateCodelength(std::vector<NodeBase*>& nodes)
 	biasedCost = calcNumModuleCost(currentNumModules);
 }
 
-double BiasedMapEquation::calcCodelength(const NodeBase& parent) const
+std::pair<double, double> BiasedMapEquation::calcCodelength(const NodeBase& parent) const
 {
 	return parent.isLeafModule() ?
 		calcCodelengthOnModuleOfLeafNodes(parent) :
@@ -102,9 +102,9 @@ double BiasedMapEquation::calcCodelength(const NodeBase& parent) const
 		MapEquation::calcCodelengthOnModuleOfModules(parent);
 }
 
-double BiasedMapEquation::calcCodelengthOnModuleOfLeafNodes(const NodeBase& parent) const
+std::pair<double, double> BiasedMapEquation::calcCodelengthOnModuleOfLeafNodes(const NodeBase& parent) const
 {
-	double indexLength = MapEquation::calcCodelength(parent);
+	std::pair<double, double> indexLength = MapEquation::calcCodelength(parent);
 
 	// double biasedCost	= calcNumModuleCost(parent.childDegree())
 	// std::cout << "\n!!!!! calcCodelengthOnModuleOfLeafNodes(parent) -> biasedCost: " << biasedCost << "\n";
@@ -131,7 +131,7 @@ double BiasedMapEquation::getDeltaCodelengthOnMovingNode(NodeBase& current,
 		return deltaL;
 
 	int deltaNumModules = getDeltaNumModulesIfMoving(current, oldModuleDelta.module, newModuleDelta.module, moduleMembers);
-	
+
 	double deltaBiasedCost = calcNumModuleCost(currentNumModules + deltaNumModules) - biasedCost;
 
 	// std::cout << "\n!!!!! getDeltaCodelengthOnMovingNode(" << current.stateId << ") from " <<
@@ -155,9 +155,9 @@ void BiasedMapEquation::updateCodelengthOnMovingNode(NodeBase& current,
 
 	if (preferredNumModules == 0)
 		return;
-	
+
 	int deltaNumModules = getDeltaNumModulesIfMoving(current, oldModuleDelta.module, newModuleDelta.module, moduleMembers);
-	
+
 	// double deltaBiasedCost = calcNumModuleCost(currentNumModules + deltaNumModules) - biasedCost;
 
 	// std::cout << "\n!!!!! updateCodelengthOnMovingNode(" << current.stateId << ") from " <<
@@ -165,12 +165,12 @@ void BiasedMapEquation::updateCodelengthOnMovingNode(NodeBase& current,
 	// 	newModule << " (" << moduleMembers[newModule] << ") -> currentNumModules = " <<
 	// 	currentNumModules << " + " << deltaNumModules << " => cost: " <<
 	// 	biasedCost << " + " << deltaBiasedCost << " = " << (biasedCost + deltaBiasedCost) << "\n";
-	
+
 	// biasedCost += deltaBiasedCost;
 
 	currentNumModules += deltaNumModules;
 	biasedCost = calcNumModuleCost(currentNumModules);
-	
+
 }
 
 

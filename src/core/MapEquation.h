@@ -72,11 +72,11 @@ public:
 
 	static bool haveMemory() { return false; }
 
-	double getIndexCodelength() const { return indexCodelength; }
+	std::pair<double, double> getIndexCodelength() const { return indexCodelength; }
 
-	double getModuleCodelength() const { return moduleCodelength; }
+	std::pair<double, double> getModuleCodelength() const { return moduleCodelength; }
 
-	double getCodelength() const { return codelength; }
+	std::pair<double, double> getCodelength() const { return codelength; }
 
 	// ===================================================
 	// IO
@@ -105,7 +105,7 @@ public:
 	// Codelength
 	// ===================================================
 
-	double calcCodelength(const NodeBase& parent) const;
+	std::pair<double, double> calcCodelength(const NodeBase& parent) const;
 
 	void addMemoryContributions(NodeBase& current, DeltaFlowDataType& oldModuleDelta, DeltaFlowDataType& newModuleDelta) {}
 
@@ -140,9 +140,9 @@ protected:
 	// Protected member functions
 	// ===================================================
 
-	double calcCodelengthOnModuleOfLeafNodes(const NodeBase& parent) const;
+	std::pair<double, double> calcCodelengthOnModuleOfLeafNodes(const NodeBase& parent) const;
 
-	double calcCodelengthOnModuleOfModules(const NodeBase& parent) const;
+	std::pair<double, double> calcCodelengthOnModuleOfModules(const NodeBase& parent) const;
 
 	void calculateCodelength(std::vector<NodeBase*>& nodes);
 
@@ -156,25 +156,25 @@ public:
 	// Public member variables
 	// ===================================================
 
-	double codelength = 0.0;
-	double indexCodelength = 0.0;
-	double moduleCodelength = 0.0;
+	std::pair<double, double> codelength = { 0.0, 0.0 };
+	std::pair<double, double> indexCodelength = { 0.0, 0.0 };
+	std::pair<double, double> moduleCodelength = { 0.0, 0.0 };
 
 protected:
 	// ===================================================
 	// Protected member variables
 	// ===================================================
 
-	double nodeFlow_log_nodeFlow = 0.0; // constant while the leaf network is the same
-	double flow_log_flow = 0.0; // node.(flow + exitFlow)
-	double exit_log_exit = 0.0;
-	double enter_log_enter = 0.0;
-	double enterFlow = 0.0;
-	double enterFlow_log_enterFlow = 0.0;
+	std::pair<double, double> nodeFlow_log_nodeFlow = { 0.0, 0.0 }; // constant while the leaf network is the same
+	std::pair<double, double> flow_log_flow = { 0.0, 0.0 }; // node.(flow + exitFlow)
+	std::pair<double, double> exit_log_exit = { 0.0, 0.0 };
+	std::pair<double, double> enter_log_enter = { 0.0, 0.0 };
+	std::pair<double, double> enterFlow = { 0.0, 0.0 };
+	std::pair<double, double> enterFlow_log_enterFlow = { 0.0, 0.0 };
 
 	// For hierarchical
-	double exitNetworkFlow = 0.0;
-	double exitNetworkFlow_log_exitNetworkFlow = 0.0;
+	std::pair<double, double> exitNetworkFlow = { 0.0, 0.0 };
+	std::pair<double, double> exitNetworkFlow_log_exitNetworkFlow = { 0.0, 0.0 };
 };
 
 }

@@ -182,22 +182,16 @@ public:
 	virtual void copyData(NodeBase& other) {}
 
 	virtual void resetFlow() {}
-	virtual void setFlow(double flow) {}
-	virtual void setFlow(unsigned int flow) {}
-	virtual void addFlow(double flow) {}
-	virtual void addFlow(unsigned int flow) {}
-	virtual void setEnterFlow(double flow) {}
-	virtual void setExitFlow(double flow) {}
-	virtual void setEnterExitFlow(unsigned int flow) {}
-	virtual void addEnterFlow(double flow) {}
-	virtual void addExitFlow(double flow) {}
-	virtual void addEnterExitFlow(unsigned int flow) {}
-	virtual double getFlow() const { return 0; };
-	virtual double getEnterFlow() const { return 0; };
-	virtual double getExitFlow() const { return 0; };
-	virtual unsigned int getFlowInt() const { return 0; };
-	virtual unsigned int getEnterExitFlow() const { return 0; };
-	virtual FlowData getFlowData() const { return 0; };
+	virtual void setFlow(std::pair<double, double> flow) {}
+	virtual void addFlow(std::pair<double, double> flow) {}
+	virtual void setEnterFlow(std::pair<double, double> flow) {}
+	virtual void setExitFlow(std::pair<double, double> flow) {}
+	virtual void addEnterFlow(std::pair<double, double> flow) {}
+	virtual void addExitFlow(std::pair<double, double> flow) {}
+	virtual std::pair<double, double> getFlow() const {};
+	virtual std::pair<double, double> getEnterFlow() const {};
+	virtual std::pair<double, double> getExitFlow() const {};
+	virtual FlowData getFlowData() const {};
 
 	// ---------------------------- Infomap ----------------------------
 	InfomapBase& getInfomap();
@@ -443,7 +437,7 @@ public:
 
 	void deleteChildren();
 
-	EdgeType* addOutEdge(NodeBase& target, double weight, double flow = 0.0)
+	EdgeType* addOutEdge(NodeBase& target, double weight, std::pair<double, double> flow = { 0.0, 0.0 })
 	{
 		EdgeType* edge = new EdgeType(*this, target, weight, flow);
 		m_outEdges.push_back(edge);

@@ -35,6 +35,11 @@ namespace infomap
 {
 	namespace infomath
 	{
+		inline double total(std::pair<double, double> p)
+		{
+			return p.first + p.second;
+		}
+
 		inline
 		double log2(double p)
 		{
@@ -45,6 +50,12 @@ namespace infomap
 		double plogp(double p)
 		{
 			return p > 0.0 ? p * log2(p) : 0.0;
+		}
+
+		inline
+		std::pair<double, double> plogp(std::pair<double, double> p)
+		{
+			return std::make_pair(p.first  > 0.0 ? p.first * log2(p.first) : 0.0, p.second > 0.0 ? p.second * log2(p.second) : 0.0);
 		}
 
 		inline

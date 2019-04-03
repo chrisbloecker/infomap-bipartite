@@ -57,50 +57,32 @@ public:
 	virtual void resetFlow() {
 		data.resetFlow();
 	}	
-	virtual void setFlow(double flow) {
+	virtual void setFlow(std::pair<double, double> flow) {
 		data.setFlow(flow);
 	}
-	virtual void setFlow(unsigned int flow) {
-		data.setFlow(flow);
-	}
-	virtual void addFlow(double flow) {
+	virtual void addFlow(std::pair<double, double> flow) {
 		data.addFlow(flow);
 	}
-	virtual void addFlow(unsigned int flow) {
-		data.addFlow(flow);
-	}
-	virtual void setEnterFlow(double flow) {
+	virtual void setEnterFlow(std::pair<double, double> flow) {
 		data.setEnterFlow(flow);
 	}
-	virtual void setExitFlow(double flow) {
+	virtual void setExitFlow(std::pair<double, double> flow) {
 		data.setExitFlow(flow);
 	}
-	virtual void setEnterExitFlow(unsigned int flow) {
-		data.setEnterExitFlow(flow);
-	}
-	virtual void addEnterFlow(double flow) {
+	virtual void addEnterFlow(std::pair<double, double> flow) {
 		data.addEnterFlow(flow);
 	}
-	virtual void addExitFlow(double flow) {
+	virtual void addExitFlow(std::pair<double, double> flow) {
 		data.addExitFlow(flow);
 	}
-	virtual void addEnterExitFlow(unsigned int flow) {
-		data.addEnterExitFlow(flow);
-	}
-	virtual double getFlow() const {
+	virtual std::pair<double, double> getFlow() const {
 		return data.getFlow();
 	}
-	virtual double getEnterFlow() const {
+	virtual std::pair<double, double> getEnterFlow() const {
 		return data.getEnterFlow();
 	}
-	virtual double getExitFlow() const {
+	virtual std::pair<double, double> getExitFlow() const {
 		return data.getExitFlow();
-	}
-	virtual unsigned int getFlowInt() const {
-		return data.getFlowInt();
-	}
-	virtual unsigned int getEnterExitFlow() const {
-		return data.getEnterExitFlow();
 	}
 
 	virtual FlowData getFlowData() const {

@@ -83,7 +83,7 @@ public:
 	// Codelength
 	// ===================================================
 
-	double calcCodelength(const NodeBase& parent) const;
+	std::pair<double, double> calcCodelength(const NodeBase& parent) const;
 	
 	void addMemoryContributions(NodeBase& current, DeltaFlowDataType& oldModuleDelta, VectorMap<DeltaFlowDataType>& moduleDeltaFlow) {}
 
@@ -111,7 +111,7 @@ protected:
 	// ===================================================
 	// Protected member functions
 	// ===================================================
-	double calcCodelengthOnModuleOfLeafNodes(const NodeBase& parent) const;
+	std::pair<double, double> calcCodelengthOnModuleOfLeafNodes(const NodeBase& parent) const;
 
 	int getDeltaNumModulesIfMoving(NodeBase& current,
 			unsigned int oldModule, unsigned int newModule, std::vector<unsigned int>& moduleMembers) const;
