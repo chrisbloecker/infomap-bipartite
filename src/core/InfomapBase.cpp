@@ -713,8 +713,11 @@ void InfomapBase::generateSubNetwork(Network& network)
 		//else
 
 		// ToDo[chris]: what should this be?
-		std::pair<double, double> f = (networkNode.id < getConfig().minBipartiteNodeIndex) ? std::make_pair(networkNode.flow, 0.0) : std::make_pair(0.0, networkNode.flow);
-		Log() << "[DEBUG] node " << networkNode.id << ", f: (" << f.first << ", " << f.second << ")\n";
+		std::pair<double, double> f = (networkNode.physicalId < getConfig().minBipartiteNodeIndex)
+		        ? std::make_pair(networkNode.flow, 0.0)
+		        : std::make_pair(0.0, networkNode.flow)
+		        ;
+		Log() << "[DEBUG] node " << networkNode.id << ", flow: (" << f.first << ", " << f.second << ")\n";
 		NodeBase* node = new Node<FlowData>(f, networkNode.id, networkNode.physicalId, networkNode.layerId);
 
 		if (this->haveMetaData()) {
@@ -726,7 +729,7 @@ void InfomapBase::generateSubNetwork(Network& network)
 			}
 		}
 		// ToDo[chris]: same here...
-		if (networkNode.id < getConfig().minBipartiteNodeIndex)
+		if (networkNode.physicalId < getConfig().minBipartiteNodeIndex)
 			sumNodeFlow.first += networkNode.flow;
 		else
 			sumNodeFlow.second += networkNode.flow;
@@ -734,6 +737,9 @@ void InfomapBase::generateSubNetwork(Network& network)
 		nodeIndexMap[networkNode.id] = m_leafNodes.size();
 		m_leafNodes.push_back(node);
 	}
+
+	Log() << "[DEBUG] Total flow: (" << sumNodeFlow.first << ", " << sumNodeFlow.second << ") = " << infomath::total(sumNodeFlow) << "\n";
+
 	root().setFlow(sumNodeFlow);
 	m_calculateEnterExitFlow = true;
 
@@ -754,11 +760,14 @@ void InfomapBase::generateSubNetwork(Network& network)
 				++numLinksIgnored;
 			}
 			else {
-			    Log() << "[DEBUG] link " << sourceIndex << ">" << targetIndex << "\n";
 				auto& linkData = subIt.second;
 				// ToDo[chris]: I think here we have to make the difference between L>R and R>L
-				std::pair<double, double> f = (sourceIndex < getConfig().minBipartiteNodeIndex) ? std::make_pair(0.0, linkData.flow * this->markovTime) : std::make_pair(linkData.flow * this->markovTime, 0.0);
-				m_leafNodes[sourceIndex]->addOutEdge(*m_leafNodes[targetIndex], linkData.weight, f);
+				//std::pair<double, double> f = (linkSourceId < getConfig().minBipartiteNodeIndex)
+				//        ? std::make_pair(linkData.flow * this->markovTime, 0.0)
+				//        : std::make_pair(0.0, linkData.flow * this->markovTime)
+				//        ;
+				//m_leafNodes[sourceIndex]->addOutEdge(*m_leafNodes[targetIndex], linkData.weight, f);
+                m_leafNodes[sourceIndex]->addOutEdge(*m_leafNodes[targetIndex], linkData.weight, std::make_pair(linkData.flow * this->markovTime / 2, linkData.flow * this->markovTime / 2));
 				// Log() << linkSourceId << " (" << sourceIndex << ") -> " << linkTargetId << " (" << targetIndex << ")"
 				// << ", weight: " << linkData.weight << ", flow: " << linkData.flow << "\n";
 			}
@@ -899,7 +908,7 @@ void InfomapBase::partition()
 
 	double newCodelength = getCodelength();
 	double compression = oldCodelength < 1e-16 ? 0.0 : (oldCodelength - newCodelength)/oldCodelength;
-	Log(0,0) << (compression * 100) << "% " << std::flush;
+	//Log(0,0) << (compression * 100) << "% " << std::flush;
 	oldCodelength = newCodelength;
 
 	bool doFineTune = true;
@@ -953,7 +962,7 @@ void InfomapBase::partition()
 		else {
 			oldCodelength = newCodelength;
 		}
-		Log(0,0) << (compression * 100) << "% " << std::flush;
+		//Log(0,0) << (compression * 100) << "% " << std::flush;
 		doFineTune = !doFineTune;
 	}
 
@@ -1047,12 +1056,42 @@ void InfomapBase::initEnterExitFlow()
         for (auto *n : m_leafNodes) {
             for (EdgeType *e : n->outEdges()) {
                 EdgeType &edge = *e;
-                std::pair<double, double> halfFlow = { edge.data.flow.first / 2, edge.data.flow.second / 2 };
+                Log() << "[DEBUG] initEnterExitFlow " << e->source << ">" << e->target << ")\n";
+                //std::pair<double, double> halfFlow = { edge.data.flow.first / 2, edge.data.flow.second / 2 };
+                //Log() << "[DEBUG]    halfFlow = (" << halfFlow.first << ", " << halfFlow.second << ")\n";
+                //Log() << "[DEBUG] op-halfFlow = (" << op(halfFlow).first << ", " << op(halfFlow).second << ")\n";
                 // double halfFlow = edge.data.flow;
-                edge.source.addExitFlow(halfFlow);
-                edge.target.addExitFlow(halfFlow);
-                edge.source.addEnterFlow(halfFlow);
-                edge.target.addEnterFlow(halfFlow);
+                if (edge.source.physicalId < getConfig().minBipartiteNodeIndex)
+                {
+                    /*
+                    edge.source.addEnterFlow(op(halfFlow));
+                    edge.source.addExitFlow(halfFlow);
+                    edge.target.addEnterFlow(halfFlow);
+                    edge.target.addExitFlow(op(halfFlow));
+                     */
+                    edge.source.addEnterFlow(zeroRight(edge.data.flow));
+                    edge.source.addExitFlow(zeroLeft(edge.data.flow));
+                    edge.target.addEnterFlow(zeroLeft(edge.data.flow));
+                    edge.target.addExitFlow(zeroRight(edge.data.flow));
+                }
+                else
+                {
+                    /*
+                    edge.source.addEnterFlow(halfFlow);
+                    edge.source.addExitFlow(op(halfFlow));
+                    edge.target.addEnterFlow(op(halfFlow));
+                    edge.target.addExitFlow(halfFlow);
+                     */
+                    edge.source.addEnterFlow(zeroLeft(edge.data.flow));
+                    edge.source.addExitFlow(zeroRight(edge.data.flow));
+                    edge.target.addEnterFlow(zeroRight(edge.data.flow));
+                    edge.target.addExitFlow(zeroLeft(edge.data.flow));
+                }
+
+                Log() << "[DEBUG] edge source enter (" << edge.source.getEnterFlow().first << ", " << edge.source.getEnterFlow().second << ")\n";
+                Log() << "[DEBUG] edge source exit  (" << edge.source.getExitFlow().first  << ", " << edge.source.getExitFlow().second  << ")\n";
+                Log() << "[DEBUG] edge target enter (" << edge.target.getEnterFlow().first << ", " << edge.target.getEnterFlow().second << ")\n";
+                Log() << "[DEBUG] edge target exit  (" << edge.target.getExitFlow().first  << ", " << edge.target.getExitFlow().second  << ")\n";
                 // int -- don't care...
 				//edge.source.addEnterExitFlow(1); // TODO: edge.data.weight;
 				//edge.target.addEnterExitFlow(1); // TODO: edge.data.weight;

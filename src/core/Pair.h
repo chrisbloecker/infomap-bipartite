@@ -17,5 +17,8 @@ std::pair<double, double>& operator+=(std::pair<double, double>& self, const std
 std::pair<double, double>& operator-=(std::pair<double, double>& self, const std::pair<double, double> other);
 std::pair<double, double>& operator*=(std::pair<double, double>& self, const std::pair<double, double> other);
 std::ostream& operator<<(std::ostream& out, const std::pair<double, double>& data);
+std::pair<double, double> op(const std::pair<double, double> p);
+std::pair<double, double> zeroLeft(const std::pair<double, double> p);
+std::pair<double, double> zeroRight(const std::pair<double, double> p);
 
 #endif //INFOMAP_BIPARTITE_PAIR_H

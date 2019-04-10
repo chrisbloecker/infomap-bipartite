@@ -27,7 +27,7 @@ public:
 	using NodeType = Node<FlowDataType>;
 
 	InfomapOptimizer() {}
-	
+
 	virtual ~InfomapOptimizer() {}
 
 	virtual void init(InfomapBase* infomap);
@@ -60,7 +60,7 @@ public:
 	virtual bool haveMemory() const;
 
 protected:
-	
+
 	// virtual InfomapBase& getInfomap(NodeBase& node);
 	// virtual InfomapBase* getNewInfomapInstance() const;
 	// virtual InfomapBase* getNewInfomapInstanceWithoutMemory() const;
@@ -92,9 +92,9 @@ protected:
 	virtual void moveActiveNodesToPredifinedModules(std::vector<unsigned int>& modules);
 
 	virtual unsigned int optimizeActiveNetwork();
-	
+
 	virtual unsigned int tryMoveEachNodeIntoBestModule();
-	
+
 	// virtual unsigned int tryMoveEachNodeIntoBestModuleLocal();
 
 	virtual unsigned int tryMoveEachNodeIntoBestModuleInParallel();
@@ -264,6 +264,7 @@ template<typename Objective>
 inline
 void InfomapOptimizer<Objective>::moveActiveNodesToPredifinedModules(std::vector<unsigned int>& modules)
 {
+  Log() << "[DEBUG] moveActiveNodesToPredifinedModules\n";
 	auto& network = m_infomap->activeNetwork();
 	unsigned int numNodes = network.size();
 	if (modules.size() != numNodes)
@@ -278,14 +279,16 @@ void InfomapOptimizer<Objective>::moveActiveNodesToPredifinedModules(std::vector
 
 		if (newM != oldM)
 		{
+			Log() << "[DEBUG] Building flow deltas...\n";
+
 			DeltaFlowDataType oldModuleDelta(oldM, { 0.0, 0.0 }, { 0.0, 0.0 });
 			DeltaFlowDataType newModuleDelta(newM, { 0.0, 0.0 }, { 0.0, 0.0 });
-
 
 			// For all outlinks
 			for (auto& e : current.outEdges())
 			{
 				auto& edge = *e;
+				Log() << "[DEBUG] outgoing edge flow: (" << edge.data.flow.first << ", " << edge.data.flow.second << ")\n";
 				unsigned int otherModule = edge.target.index;
 				if (otherModule == oldM)
 					oldModuleDelta.deltaExit += edge.data.flow;
@@ -296,6 +299,7 @@ void InfomapOptimizer<Objective>::moveActiveNodesToPredifinedModules(std::vector
 			for (auto& e : current.inEdges())
 			{
 				auto& edge = *e;
+                Log() << "[DEBUG] incoming edge flow: (" << edge.data.flow.first << ", " << edge.data.flow.second << ")\n";
 				unsigned int otherModule = edge.source.index;
 				if (otherModule == oldM)
 					oldModuleDelta.deltaEnter += edge.data.flow;
@@ -341,7 +345,7 @@ unsigned int InfomapOptimizer<Objective>::optimizeActiveNetwork()
 	}
 
 	// Log() << "\nOptimize, initial codelength: " << m_objective.getCodelength();
-	
+
 	do
 	{
 		++coreLoopCount;
@@ -566,6 +570,7 @@ template<typename Objective>
 inline
 unsigned int InfomapOptimizer<Objective>::tryMoveEachNodeIntoBestModule()
 {
+  Log() << "[DEBUG] tryMoveEachNodeIntoBestModule\n";
 	// m_rand.seed(123);
 	// Get random enumeration of nodes
 	auto& network = m_infomap->activeNetwork();
@@ -620,7 +625,7 @@ unsigned int InfomapOptimizer<Objective>::tryMoveEachNodeIntoBestModule()
 			auto& edge = *e;
 			NodeBase& neighbour = edge.target;
 			// deltaFlow[neighbour.index] += DeltaFlowDataType(neighbour.index, edge.data.flow, 0);
-			deltaFlow.add(neighbour.index, DeltaFlowDataType(neighbour.index, edge.data.flow, { 0.0, 0.0 }));
+			deltaFlow.add(neighbour.index, DeltaFlowDataType(neighbour.index, edge.data.flow, { 0.0, 0.0}));
 		}
 		// For all inlinks
 		for (auto& e : current.inEdges())
@@ -664,6 +669,7 @@ unsigned int InfomapOptimizer<Objective>::tryMoveEachNodeIntoBestModule()
 		}
 
 		DeltaFlowDataType bestDeltaModule(oldModuleDelta);
+		Log() << "[DEBUG] bestDeltaModule: " << bestDeltaModule << "\n";
 		double bestDeltaCodelength = 0.0;
 		DeltaFlowDataType strongestConnectedModule(oldModuleDelta);
 		double deltaCodelengthOnStrongestConnectedModule = 0.0;
@@ -699,6 +705,7 @@ unsigned int InfomapOptimizer<Objective>::tryMoveEachNodeIntoBestModule()
 				}
 			}
 		}
+		Log() << "[DEBUG] bestDeltaModule: " << bestDeltaModule << "\n";
 
 		// Prefer strongest connected module if equal delta codelength
 		if (strongestConnectedModule.module != bestDeltaModule.module &&
@@ -752,7 +759,20 @@ unsigned int InfomapOptimizer<Objective>::tryMoveEachNodeIntoBestModule()
 
 	}
 
+  for (unsigned int i = 0; i < m_moduleFlowData.size(); ++i)
+  {
+    Log() << "[DEBUG] " << m_moduleFlowData[i] << "\n";
+  }
+
+  Log() << "[DEBUG] Module sizes: [" << m_moduleMembers[0];
+  for (unsigned int m = 1; m < m_moduleMembers.size(); ++m)
+    Log() << ", " << m_moduleMembers[m];
+  Log() << "]\n";
 	// Log() << " !!! " << t << "/" << tCount << " = " << t / tCount << " !!! ";
+
+    Log() << "[DEBUG] Memberships:\n";
+    for (unsigned int m = 0; m < m_infomap->activeNetwork().size(); ++m)
+        Log() << "[DEBUG]  " << m_infomap->activeNetwork()[m]->physicalId << ": " << m_infomap->activeNetwork()[m]->index << "\n";
 
 	return numMoved;
 }

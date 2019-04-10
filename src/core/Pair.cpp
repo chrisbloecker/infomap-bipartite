@@ -56,3 +56,18 @@ std::ostream& operator<<(std::ostream& out, const std::pair<double, double>& dat
 {
     return out << "(" << data.first << "," << data.second << ")";
 }
+
+std::pair<double, double> op(const std::pair<double, double> p)
+{
+    return std::make_pair(p.second, p.first);
+}
+
+std::pair<double, double> zeroLeft(const std::pair<double, double> p)
+{
+    return std::make_pair(0.0, p.second);
+}
+
+std::pair<double, double> zeroRight(const std::pair<double, double> p)
+{
+    return std::make_pair(p.first, 0.0);
+}
