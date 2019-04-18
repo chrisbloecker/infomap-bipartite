@@ -1063,29 +1063,17 @@ void InfomapBase::initEnterExitFlow()
                 // double halfFlow = edge.data.flow;
                 if (edge.source.physicalId < getConfig().minBipartiteNodeIndex)
                 {
-                    /*
-                    edge.source.addEnterFlow(op(halfFlow));
-                    edge.source.addExitFlow(halfFlow);
-                    edge.target.addEnterFlow(halfFlow);
-                    edge.target.addExitFlow(op(halfFlow));
-                     */
-                    edge.source.addEnterFlow(zeroRight(edge.data.flow));
-                    edge.source.addExitFlow(zeroLeft(edge.data.flow));
-                    edge.target.addEnterFlow(zeroLeft(edge.data.flow));
-                    edge.target.addExitFlow(zeroRight(edge.data.flow));
-                }
-                else
-                {
-                    /*
-                    edge.source.addEnterFlow(halfFlow);
-                    edge.source.addExitFlow(op(halfFlow));
-                    edge.target.addEnterFlow(op(halfFlow));
-                    edge.target.addExitFlow(halfFlow);
-                     */
                     edge.source.addEnterFlow(zeroLeft(edge.data.flow));
                     edge.source.addExitFlow(zeroRight(edge.data.flow));
                     edge.target.addEnterFlow(zeroRight(edge.data.flow));
                     edge.target.addExitFlow(zeroLeft(edge.data.flow));
+                }
+                else
+                {
+                    edge.source.addEnterFlow(zeroRight(edge.data.flow));
+                    edge.source.addExitFlow(zeroLeft(edge.data.flow));
+                    edge.target.addEnterFlow(zeroLeft(edge.data.flow));
+                    edge.target.addExitFlow(zeroRight(edge.data.flow));
                 }
 
                 Log() << "[DEBUG] edge source enter (" << edge.source.getEnterFlow().first << ", " << edge.source.getEnterFlow().second << ")\n";

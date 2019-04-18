@@ -108,7 +108,7 @@ void MapEquation::calculateCodelengthTerms(std::vector<NodeBase*>& nodes)
         Log() << "[DEBUG] node " << node.index << ": (" << node.data.flow.first << ", " << node.data.flow.second << ")\n";
 
 		// own node/module codebook
-		flow_log_flow += infomath::plogp(node.data.flow + node.data.exitFlow);
+		flow_log_flow += infomath::plogp(node.data.enterFlow + node.data.exitFlow); // <-- here, we had to change flow to enterFlow
 
 		// use of index codebook
 		enter_log_enter += infomath::plogp(node.data.enterFlow);
@@ -195,7 +195,7 @@ std::pair<double, double> MapEquation::calcCodelengthOnModuleOfModules(const Nod
 	{
 		auto& node = getNode(n);
 		sumEnter += node.data.enterFlow; // rate of enter to finer level
-		sumEnterLogEnter += infomath::plogp(node.data.enterFlow);
+		sumEnterLogEnter += infomath::plogp(node.data.enterFlow); // ToDo[chris]: here, we also had to change to exit!
 	}
 	// The possibilities from this module: Either exit to coarser level or enter one of its children
 	std::pair<double, double> totalCodewordUse = parentExit + sumEnter;
@@ -237,7 +237,7 @@ double MapEquation::getDeltaCodelengthOnMovingNode(NodeBase& curr,
 			+ plogp(moduleFlowData[oldModule].exitFlow + moduleFlowData[oldModule].flow \
 					- current.data.exitFlow - current.data.flow + deltaEnterExitOldModule) \
 			+ plogp(moduleFlowData[newModule].exitFlow + moduleFlowData[newModule].enterFlow \
-					+ current.data.exitFlow + current.data.flow - deltaEnterExitNewModule); // <--h
+					+ current.data.exitFlow + current.data.flow - deltaEnterExitNewModule);
 
 	std::pair<double, double> deltaL = delta_enter - delta_enter_log_enter - delta_exit_log_exit + delta_flow_log_flow;
 	return infomath::total(deltaL);
@@ -266,18 +266,11 @@ void MapEquation::updateCodelengthOnMovingNode(NodeBase& curr,
     Log() << "[DEBUG] old (a) (" << oldModule << "): " << moduleFlowData[oldModule] << "\n";
     Log() << "[DEBUG] new (a) (" << newModule << "): " << moduleFlowData[newModule] << "\n";
 
-	enterFlow -= \
-			moduleFlowData[oldModule].enterFlow + \
-			moduleFlowData[newModule].enterFlow;
-	enter_log_enter -= \
-			plogp(moduleFlowData[oldModule].enterFlow) + \
-			plogp(moduleFlowData[newModule].enterFlow);
-	exit_log_exit -= \
-			plogp(moduleFlowData[oldModule].exitFlow) + \
-			plogp(moduleFlowData[newModule].exitFlow);
-	flow_log_flow -= \
-			plogp(moduleFlowData[oldModule].exitFlow + moduleFlowData[oldModule].flow) + \
-			plogp(moduleFlowData[newModule].exitFlow + moduleFlowData[newModule].flow); // <--
+	enterFlow       -= moduleFlowData[oldModule].enterFlow        + moduleFlowData[newModule].enterFlow;
+	enter_log_enter -= plogp(moduleFlowData[oldModule].enterFlow) + plogp(moduleFlowData[newModule].enterFlow);
+	exit_log_exit   -= plogp(moduleFlowData[oldModule].exitFlow)  + plogp(moduleFlowData[newModule].exitFlow);
+	flow_log_flow   -= plogp(moduleFlowData[oldModule].exitFlow   + moduleFlowData[oldModule].flow)
+	                 + plogp(moduleFlowData[newModule].exitFlow   + moduleFlowData[newModule].flow);
 
 	moduleFlowData[oldModule] -= current.data;
 	moduleFlowData[newModule] += current.data;
@@ -293,18 +286,11 @@ void MapEquation::updateCodelengthOnMovingNode(NodeBase& curr,
     Log() << "[DEBUG] old (c) (" << oldModule << "): " << moduleFlowData[oldModule] << "\n";
     Log() << "[DEBUG] new (c) (" << newModule << "): " << moduleFlowData[newModule] << "\n";
 
-	enterFlow += \
-			moduleFlowData[oldModule].enterFlow + \
-			moduleFlowData[newModule].enterFlow;
-	enter_log_enter += \
-			plogp(moduleFlowData[oldModule].enterFlow) + \
-			plogp(moduleFlowData[newModule].enterFlow);
-	exit_log_exit += \
-			plogp(moduleFlowData[oldModule].exitFlow) + \
-			plogp(moduleFlowData[newModule].exitFlow);
-	flow_log_flow += \
-			plogp(moduleFlowData[oldModule].exitFlow + moduleFlowData[oldModule].flow) + \
-			plogp(moduleFlowData[newModule].exitFlow + moduleFlowData[newModule].flow); // <--
+	enterFlow       += moduleFlowData[oldModule].enterFlow        + moduleFlowData[newModule].enterFlow;
+	enter_log_enter += plogp(moduleFlowData[oldModule].enterFlow) + plogp(moduleFlowData[newModule].enterFlow);
+	exit_log_exit   += plogp(moduleFlowData[oldModule].exitFlow)  +	plogp(moduleFlowData[newModule].exitFlow);
+	flow_log_flow   += plogp(moduleFlowData[oldModule].exitFlow   + moduleFlowData[oldModule].flow)
+	                 + plogp(moduleFlowData[newModule].exitFlow   + moduleFlowData[newModule].flow);
 
 	enterFlow_log_enterFlow = plogp(enterFlow);
 

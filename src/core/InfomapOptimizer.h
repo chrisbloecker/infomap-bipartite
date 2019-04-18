@@ -277,6 +277,8 @@ void InfomapOptimizer<Objective>::moveActiveNodesToPredifinedModules(std::vector
 		unsigned int oldM = current.index;
 		unsigned int newM = modules[i];
 
+		Log() << "[DEBUG] Moving " << oldM << " to " << newM << "\n";
+
 		if (newM != oldM)
 		{
 			Log() << "[DEBUG] Building flow deltas...\n";
@@ -302,9 +304,9 @@ void InfomapOptimizer<Objective>::moveActiveNodesToPredifinedModules(std::vector
                 Log() << "[DEBUG] incoming edge flow: (" << edge.data.flow.first << ", " << edge.data.flow.second << ")\n";
 				unsigned int otherModule = edge.source.index;
 				if (otherModule == oldM)
-					oldModuleDelta.deltaEnter += edge.data.flow;
+                    oldModuleDelta.deltaEnter += edge.data.flow;
 				else if (otherModule == newM)
-					newModuleDelta.deltaEnter += edge.data.flow;
+                    newModuleDelta.deltaEnter += edge.data.flow;
 			}
 
 
