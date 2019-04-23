@@ -108,7 +108,7 @@ void MapEquation::calculateCodelengthTerms(std::vector<NodeBase*>& nodes)
         Log() << "[DEBUG] node " << node.index << ": (" << node.data.flow.first << ", " << node.data.flow.second << ")\n";
 
 		// own node/module codebook
-		flow_log_flow += infomath::plogp(node.data.enterFlow + node.data.exitFlow); // <-- here, we had to change flow to enterFlow
+		flow_log_flow += infomath::plogp(node.data.flow + node.data.exitFlow); // <-- here, we had to change flow to enterFlow
 
 		// use of index codebook
 		enter_log_enter += infomath::plogp(node.data.enterFlow);
@@ -236,8 +236,8 @@ double MapEquation::getDeltaCodelengthOnMovingNode(NodeBase& curr,
 			- plogp(moduleFlowData[newModule].exitFlow + moduleFlowData[newModule].flow) \
 			+ plogp(moduleFlowData[oldModule].exitFlow + moduleFlowData[oldModule].flow \
 					- current.data.exitFlow - current.data.flow + deltaEnterExitOldModule) \
-			+ plogp(moduleFlowData[newModule].exitFlow + moduleFlowData[newModule].enterFlow \
-					+ current.data.exitFlow + current.data.flow - deltaEnterExitNewModule);
+			+ plogp(moduleFlowData[newModule].exitFlow + moduleFlowData[newModule].flow \
+					+ current.data.exitFlow + current.data.flow - deltaEnterExitNewModule); // <--
 
 	std::pair<double, double> deltaL = delta_enter - delta_enter_log_enter - delta_exit_log_exit + delta_flow_log_flow;
 	return infomath::total(deltaL);
