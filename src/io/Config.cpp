@@ -48,8 +48,8 @@ Config Config::fromString(std::string flags, bool requireFileInput)
 	// api.addOptionArgument(conf.withMemory, "with-memory",
 	// 		"Use second order Markov dynamics and let nodes be part of different modules. Simulate memory from first-order data if not '3gram' input.", true);
 
-//	api.addOptionArgument(conf.bipartite, "bipartite",
-//			"Let the source id of a link belong to a different kind of nodes and ignore that set in the output.");
+	api.addOptionArgument(conf.bipartite, "bipartite",
+			"Let the source id of a link belong to a different kind of nodes and ignore that set in the output.");
 
 	api.addOptionArgument(conf.skipAdjustBipartiteFlow, "skip-adjust-bipartite-flow",
 			"Skip distributing all flow from the bipartite nodes (first column) to the ordinary nodes (second column).", true);

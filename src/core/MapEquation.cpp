@@ -105,7 +105,7 @@ void MapEquation::calculateCodelengthTerms(std::vector<NodeBase*>& nodes)
 	for (NodeBase* n : nodes)
 	{
 		const NodeType& node = getNode(*n);
-        Log() << "[DEBUG] node " << node.index << ": (" << node.data.flow.first << ", " << node.data.flow.second << ")\n";
+        //Log() << "[DEBUG] node " << node.index << ": (" << node.data.flow.first << ", " << node.data.flow.second << ")\n";
 
 		// own node/module codebook
 		flow_log_flow += infomath::plogp(node.data.flow + node.data.exitFlow); // <-- here, we had to change flow to enterFlow
@@ -121,10 +121,10 @@ void MapEquation::calculateCodelengthTerms(std::vector<NodeBase*>& nodes)
 	enterFlow += exitNetworkFlow;
 	enterFlow_log_enterFlow = infomath::plogp(enterFlow);
 
-	Log() << "[DEBUG] enter_log_enter: (" << enter_log_enter.first << ", " << enter_log_enter.second << ")\n";
-	Log() << "[DEBUG] flow_log_flow:   (" << flow_log_flow.first << ", " << flow_log_flow.second << ")\n";
-	Log() << "[DEBUG] exit_log_exit:   (" << exit_log_exit.first << ", " << exit_log_exit.second << ")\n";
-	Log() << "[DEBUG] enterFlow:       (" << enterFlow.first << ", " << enterFlow.second << ")\n";
+	//Log() << "[DEBUG] enter_log_enter: (" << enter_log_enter.first << ", " << enter_log_enter.second << ")\n";
+	//Log() << "[DEBUG] flow_log_flow:   (" << flow_log_flow.first << ", " << flow_log_flow.second << ")\n";
+	//Log() << "[DEBUG] exit_log_exit:   (" << exit_log_exit.first << ", " << exit_log_exit.second << ")\n";
+	//Log() << "[DEBUG] enterFlow:       (" << enterFlow.first << ", " << enterFlow.second << ")\n";
 }
 
 void MapEquation::calculateCodelengthFromCodelengthTerms()
@@ -133,9 +133,9 @@ void MapEquation::calculateCodelengthFromCodelengthTerms()
 	moduleCodelength = -exit_log_exit + flow_log_flow - nodeFlow_log_nodeFlow;
 	codelength = indexCodelength + moduleCodelength;
 
-	Log() << "[DEBUG] Index:      (" << enterFlow_log_enterFlow.first << ", " << enterFlow_log_enterFlow.second << ") - (" << enter_log_enter.first << ", " << enter_log_enter.second << ") - (" << exitNetworkFlow_log_exitNetworkFlow.first << ", " << exitNetworkFlow_log_exitNetworkFlow.second << ")\n";
-    Log() << "[DEBUG] Module      (" << -exit_log_exit.first << ", " << -exit_log_exit.second << ") + (" << flow_log_flow.first << ", " << flow_log_flow.second << ") - (" << nodeFlow_log_nodeFlow.first << ", " << nodeFlow_log_nodeFlow.second << ")\n";
-	Log() << "[DEBUG] Codelength: (" << indexCodelength.first << ", " << indexCodelength.second << ") + (" << moduleCodelength.first << ", " << moduleCodelength.second << ") = (" << codelength.first << ", " << codelength.second << ") = " << io::toPrecision(infomath::total(codelength)) << "\n";
+	//Log() << "[DEBUG] Index:      (" << enterFlow_log_enterFlow.first << ", " << enterFlow_log_enterFlow.second << ") - (" << enter_log_enter.first << ", " << enter_log_enter.second << ") - (" << exitNetworkFlow_log_exitNetworkFlow.first << ", " << exitNetworkFlow_log_exitNetworkFlow.second << ")\n";
+    //Log() << "[DEBUG] Module      (" << -exit_log_exit.first << ", " << -exit_log_exit.second << ") + (" << flow_log_flow.first << ", " << flow_log_flow.second << ") - (" << nodeFlow_log_nodeFlow.first << ", " << nodeFlow_log_nodeFlow.second << ")\n";
+	//Log() << "[DEBUG] Codelength: (" << indexCodelength.first << ", " << indexCodelength.second << ") + (" << moduleCodelength.first << ", " << moduleCodelength.second << ") = (" << codelength.first << ", " << codelength.second << ") = " << io::toPrecision(infomath::total(codelength)) << "\n";
 }
 
 std::pair<double, double> MapEquation::calcCodelength(const NodeBase& parent) const
@@ -214,8 +214,8 @@ double MapEquation::getDeltaCodelengthOnMovingNode(NodeBase& curr,
 	std::pair<double, double> deltaEnterExitOldModule = oldModuleDelta.deltaEnter + oldModuleDelta.deltaExit;
 	std::pair<double, double> deltaEnterExitNewModule = newModuleDelta.deltaEnter + newModuleDelta.deltaExit;
 
-	Log() << "[DEBUG] deltaEnterExitOldModule: (" << deltaEnterExitOldModule.first << ", " << deltaEnterExitOldModule.second << ")\n";
-	Log() << "[DEBUG] deltaEnterExitNewModule: (" << deltaEnterExitNewModule.first << ", " << deltaEnterExitNewModule.second << ")\n";
+	// Log() << "[DEBUG] deltaEnterExitOldModule: (" << deltaEnterExitOldModule.first << ", " << deltaEnterExitOldModule.second << ")\n";
+	// Log() << "[DEBUG] deltaEnterExitNewModule: (" << deltaEnterExitNewModule.first << ", " << deltaEnterExitNewModule.second << ")\n";
 
 	std::pair<double, double> delta_enter = plogp(enterFlow + deltaEnterExitOldModule - deltaEnterExitNewModule) - enterFlow_log_enterFlow;
 
@@ -246,25 +246,25 @@ double MapEquation::getDeltaCodelengthOnMovingNode(NodeBase& curr,
 void MapEquation::updateCodelengthOnMovingNode(NodeBase& curr,
 		DeltaFlowDataType& oldModuleDelta, DeltaFlowDataType& newModuleDelta, std::vector<FlowDataType>& moduleFlowData, std::vector<unsigned int>& moduleMembers)
 {
-    Log() << "[DEBUG] ================================\n";
+  // Log() << "[DEBUG] ================================\n";
 	using infomath::plogp;
 	auto& current = getNode(curr);
-	Log() << "[DEBUG] current: " << current.data << "\n";
+	// Log() << "[DEBUG] current: " << current.data << "\n";
 	unsigned int oldModule = oldModuleDelta.module;
 	unsigned int newModule = newModuleDelta.module;
 	std::pair<double, double> deltaEnterExitOldModule = oldModuleDelta.deltaEnter + oldModuleDelta.deltaExit;
 	std::pair<double, double> deltaEnterExitNewModule = newModuleDelta.deltaEnter + newModuleDelta.deltaExit;
 
-	Log() << "[DEBUG] Delta old enter is (" << oldModuleDelta.deltaEnter.first << ", " << oldModuleDelta.deltaEnter.second << ")\n";
-    Log() << "[DEBUG] Delta old exit  is (" << oldModuleDelta.deltaExit.first  << ", " << oldModuleDelta.deltaExit.second  << ")\n";
-    Log() << "[DEBUG] Delta new enter is (" << newModuleDelta.deltaEnter.first << ", " << newModuleDelta.deltaEnter.second << ")\n";
-    Log() << "[DEBUG] Delta new exit  is (" << newModuleDelta.deltaExit.first  << ", " << newModuleDelta.deltaExit.second  << ")\n";
+  // Log() << "[DEBUG] Delta old enter is (" << oldModuleDelta.deltaEnter.first << ", " << oldModuleDelta.deltaEnter.second << ")\n";
+  // Log() << "[DEBUG] Delta old exit  is (" << oldModuleDelta.deltaExit.first  << ", " << oldModuleDelta.deltaExit.second  << ")\n";
+  // Log() << "[DEBUG] Delta new enter is (" << newModuleDelta.deltaEnter.first << ", " << newModuleDelta.deltaEnter.second << ")\n";
+  // Log() << "[DEBUG] Delta new exit  is (" << newModuleDelta.deltaExit.first  << ", " << newModuleDelta.deltaExit.second  << ")\n";
 
-    Log() << "[DEBUG] Delta old enter/exit is (" << deltaEnterExitOldModule.first << ", " << deltaEnterExitOldModule.second << ")\n";
-	Log() << "[DEBUG] Delta new enter/exit is (" << deltaEnterExitNewModule.first << ", " << deltaEnterExitNewModule.second << ")\n";
+  // Log() << "[DEBUG] Delta old enter/exit is (" << deltaEnterExitOldModule.first << ", " << deltaEnterExitOldModule.second << ")\n";
+  // Log() << "[DEBUG] Delta new enter/exit is (" << deltaEnterExitNewModule.first << ", " << deltaEnterExitNewModule.second << ")\n";
 
-    Log() << "[DEBUG] old (a) (" << oldModule << "): " << moduleFlowData[oldModule] << "\n";
-    Log() << "[DEBUG] new (a) (" << newModule << "): " << moduleFlowData[newModule] << "\n";
+  // Log() << "[DEBUG] old (a) (" << oldModule << "): " << moduleFlowData[oldModule] << "\n";
+  // Log() << "[DEBUG] new (a) (" << newModule << "): " << moduleFlowData[newModule] << "\n";
 
 	enterFlow       -= moduleFlowData[oldModule].enterFlow        + moduleFlowData[newModule].enterFlow;
 	enter_log_enter -= plogp(moduleFlowData[oldModule].enterFlow) + plogp(moduleFlowData[newModule].enterFlow);
@@ -275,16 +275,16 @@ void MapEquation::updateCodelengthOnMovingNode(NodeBase& curr,
 	moduleFlowData[oldModule] -= current.data;
 	moduleFlowData[newModule] += current.data;
 
-    Log() << "[DEBUG] old (b) (" << oldModule << "): " << moduleFlowData[oldModule] << "\n";
-    Log() << "[DEBUG] new (b) (" << newModule << "): " << moduleFlowData[newModule] << "\n";
+  // Log() << "[DEBUG] old (b) (" << oldModule << "): " << moduleFlowData[oldModule] << "\n";
+  // Log() << "[DEBUG] new (b) (" << newModule << "): " << moduleFlowData[newModule] << "\n";
 
 	moduleFlowData[oldModule].enterFlow += deltaEnterExitOldModule;
 	moduleFlowData[oldModule].exitFlow += deltaEnterExitOldModule;
 	moduleFlowData[newModule].enterFlow -= deltaEnterExitNewModule;
 	moduleFlowData[newModule].exitFlow -= deltaEnterExitNewModule;
 
-    Log() << "[DEBUG] old (c) (" << oldModule << "): " << moduleFlowData[oldModule] << "\n";
-    Log() << "[DEBUG] new (c) (" << newModule << "): " << moduleFlowData[newModule] << "\n";
+  // Log() << "[DEBUG] old (c) (" << oldModule << "): " << moduleFlowData[oldModule] << "\n";
+  // Log() << "[DEBUG] new (c) (" << newModule << "): " << moduleFlowData[newModule] << "\n";
 
 	enterFlow       += moduleFlowData[oldModule].enterFlow        + moduleFlowData[newModule].enterFlow;
 	enter_log_enter += plogp(moduleFlowData[oldModule].enterFlow) + plogp(moduleFlowData[newModule].enterFlow);
@@ -297,7 +297,7 @@ void MapEquation::updateCodelengthOnMovingNode(NodeBase& curr,
 	indexCodelength = enterFlow_log_enterFlow - enter_log_enter - exitNetworkFlow_log_exitNetworkFlow;
 	moduleCodelength = -exit_log_exit + flow_log_flow - nodeFlow_log_nodeFlow;
 	codelength = indexCodelength + moduleCodelength;
-    Log() << "[DEBUG] ================================\n";
+  // Log() << "[DEBUG] ================================\n";
 }
 
 NodeBase* MapEquation::createNode() const

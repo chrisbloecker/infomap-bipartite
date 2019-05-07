@@ -15,11 +15,13 @@ using namespace infomap;
 
 %include "std_map.i"
 %include "std_vector.i"
+%include "std_pair.i"
 
 namespace std {
     %template(vector_uint) std::vector<unsigned int>;
     %template(map_uint_uint) std::map<unsigned int, unsigned int>;
     %template(map_uint_vector_uint) std::map<unsigned int, std::vector<unsigned int>>;
+    %template(pair_double_double) std::pair<double, double>;
 }
 
 #ifdef SWIGPYTHON

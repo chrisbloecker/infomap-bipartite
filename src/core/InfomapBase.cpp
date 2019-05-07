@@ -1056,7 +1056,7 @@ void InfomapBase::initEnterExitFlow()
         for (auto *n : m_leafNodes) {
             for (EdgeType *e : n->outEdges()) {
                 EdgeType &edge = *e;
-                Log() << "[DEBUG] initEnterExitFlow " << e->source << ">" << e->target << ")\n";
+                //Log() << "[DEBUG] initEnterExitFlow " << e->source << ">" << e->target << ")\n";
                 //std::pair<double, double> halfFlow = { edge.data.flow.first / 2, edge.data.flow.second / 2 };
                 //Log() << "[DEBUG]    halfFlow = (" << halfFlow.first << ", " << halfFlow.second << ")\n";
                 //Log() << "[DEBUG] op-halfFlow = (" << op(halfFlow).first << ", " << op(halfFlow).second << ")\n";
@@ -1076,10 +1076,10 @@ void InfomapBase::initEnterExitFlow()
                     edge.target.addExitFlow(zeroRight(edge.data.flow));
                 }
 
-                Log() << "[DEBUG] edge source enter (" << edge.source.getEnterFlow().first << ", " << edge.source.getEnterFlow().second << ")\n";
-                Log() << "[DEBUG] edge source exit  (" << edge.source.getExitFlow().first  << ", " << edge.source.getExitFlow().second  << ")\n";
-                Log() << "[DEBUG] edge target enter (" << edge.target.getEnterFlow().first << ", " << edge.target.getEnterFlow().second << ")\n";
-                Log() << "[DEBUG] edge target exit  (" << edge.target.getExitFlow().first  << ", " << edge.target.getExitFlow().second  << ")\n";
+                //Log() << "[DEBUG] edge source enter (" << edge.source.getEnterFlow().first << ", " << edge.source.getEnterFlow().second << ")\n";
+                //Log() << "[DEBUG] edge source exit  (" << edge.source.getExitFlow().first  << ", " << edge.source.getExitFlow().second  << ")\n";
+                //Log() << "[DEBUG] edge target enter (" << edge.target.getEnterFlow().first << ", " << edge.target.getEnterFlow().second << ")\n";
+                //Log() << "[DEBUG] edge target exit  (" << edge.target.getExitFlow().first  << ", " << edge.target.getExitFlow().second  << ")\n";
                 // int -- don't care...
 				//edge.source.addEnterExitFlow(1); // TODO: edge.data.weight;
 				//edge.target.addEnterExitFlow(1); // TODO: edge.data.weight;
