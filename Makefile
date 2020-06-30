@@ -31,10 +31,10 @@ OBJECTS := $(SOURCES:src/%.cpp=build/Infomap/%.o)
 
 .PHONY: all noomp test debug
 
-all: Infomap
+all: InfomapBipartite
 	@true
 
-Infomap: $(OBJECTS)
+InfomapBipartite: $(OBJECTS)
 	@echo "Linking object files to target $@..."
 	$(CXX) $(LDFLAGS) -o $@ $^
 	@echo "-- Link finished --"
@@ -244,4 +244,4 @@ docker-run-swig-python: Makefile
 ##################################################
 
 clean:
-	$(RM) -r Infomap build lib include
+	$(RM) -r InfomapBipartite build lib include
