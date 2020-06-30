@@ -76,7 +76,7 @@ struct Config
 	// Input
 	std::string networkFile = "";
 	std::vector<std::string> additionalInput;
-	std::string inputFormat = ""; // 'pajek', 'link-list', '3gram', 'path' or 'multilayer'
+	std::string inputFormat = "bipartite"; // 'pajek', 'link-list', '3gram', 'path' or 'multilayer'
 	bool memoryInput = false;
 	bool withMemory = false;
 	double weightThreshold = 0.0;
