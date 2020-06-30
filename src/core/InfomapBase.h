@@ -186,12 +186,12 @@ public:
 	// Run: *
 	// ===================================================
 
-	InfomapBase& initNetwork(Network& network);
-	InfomapBase& initNetwork(NodeBase& parent, bool asSuperNetwork = false);
+	InfomapBase& initNetwork(Network& network, double alpha);
+	InfomapBase& initNetwork(NodeBase& parent, bool asSuperNetwork = false, double alpha = 0);
 
 
-	void generateSubNetwork(Network& network);
-	virtual void generateSubNetwork(NodeBase& parent);
+	void generateSubNetwork(Network& network, double alpha);
+	virtual void generateSubNetwork(NodeBase& parent, double alpha);
 
 	/**
 	 * Init categorical meta data on all nodes from a file with the following format:
@@ -266,7 +266,7 @@ public:
 	/**
 	* Done in network?
 	*/
-	virtual void initEnterExitFlow();
+	virtual void initEnterExitFlow(double alpha);
 
 	// Init terms that is constant for the whole network
 	virtual void initNetwork() = 0;

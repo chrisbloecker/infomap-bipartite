@@ -51,6 +51,9 @@ Config Config::fromString(std::string flags, bool requireFileInput)
 	api.addOptionArgument(conf.bipartite, "bipartite",
 			"Let the source id of a link belong to a different kind of nodes and ignore that set in the output.");
 
+    api.addOptionArgument(conf.hybrid, "alpha",
+                          "Alpha value for bipartite map equation.", "a", true);
+
 	api.addOptionArgument(conf.skipAdjustBipartiteFlow, "skip-adjust-bipartite-flow",
 			"Skip distributing all flow from the bipartite nodes (first column) to the ordinary nodes (second column).", true);
 
@@ -89,7 +92,7 @@ Config Config::fromString(std::string flags, bool requireFileInput)
 
 	api.addOptionArgument(conf.clusterDataFile, 'c', "cluster-data",
 			"Provide an initial two-level (.clu format) or multi-layer (.tree format) solution.", "p", true);
-			
+
 	api.addOptionArgument(conf.setUnidentifiedNodesToClosestModule, "set-unidentified-nodes-to-closest-module",
 			"Merge unidentified nodes in cluster data to closest existing modules if possible.", true);
 
@@ -253,7 +256,7 @@ Config Config::fromString(std::string flags, bool requireFileInput)
 	// 	api.addOptionalNonOptionArguments(optionalOutputDir, "[out_directory]",
 	// 			"The directory to write the results to.");
 	// }
-	
+
 	api.addOptionalNonOptionArguments(optionalOutputDir, "[out_directory]",
 			"The directory to write the results to.");
 
@@ -267,7 +270,7 @@ Config Config::fromString(std::string flags, bool requireFileInput)
 
 	if (!optionalOutputDir.empty())
 		conf.outDirectory = optionalOutputDir[0];
-	
+
 	if (requireFileInput)
 		conf.noFileOutput = false;
 	else if (conf.outDirectory == "")
@@ -297,7 +300,7 @@ Config Config::fromString(std::string flags, bool requireFileInput)
 	conf.parsedOptions = api.getUsedOptionArguments();
 
 	conf.adaptDefaults();
-	
+
 	Log::init(conf.verbosity, conf.silent, conf.verboseNumberPrecision);
 
 	return conf;

@@ -83,6 +83,7 @@ struct Config
 	bool unweightedPaths = false;
 	unsigned int pathMarkovOrder = 1;
 	bool bipartite = false;
+	double hybrid = 0.0;
 	bool skipAdjustBipartiteFlow = false;
 	bool hardPartitions = false;
 	bool nonBacktracking = false;
@@ -196,6 +197,7 @@ struct Config
 		unweightedPaths(other.unweightedPaths),
 		pathMarkovOrder(other.pathMarkovOrder),
 		bipartite(other.bipartite),
+		hybrid(other.hybrid),
 		skipAdjustBipartiteFlow(other.skipAdjustBipartiteFlow),
 		hardPartitions(other.hardPartitions),
 	 	nonBacktracking(other.nonBacktracking),
@@ -291,6 +293,7 @@ struct Config
 		unweightedPaths = other.unweightedPaths;
 		pathMarkovOrder = other.pathMarkovOrder;
 	 	bipartite = other.bipartite;
+	 	hybrid = other.hybrid;
 	 	skipAdjustBipartiteFlow = other.skipAdjustBipartiteFlow;
 	 	hardPartitions = other.hardPartitions;
 	 	nonBacktracking = other.nonBacktracking;
@@ -385,6 +388,7 @@ struct Config
 		unweightedPaths = other.unweightedPaths;
 		pathMarkovOrder = other.pathMarkovOrder;
 	 	bipartite = other.bipartite;
+	 	hybrid = other.hybrid;
 	 	skipAdjustBipartiteFlow = other.skipAdjustBipartiteFlow;
 	 	hardPartitions = other.hardPartitions;
 	 	nonBacktracking = other.nonBacktracking;

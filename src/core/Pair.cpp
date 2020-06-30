@@ -24,6 +24,11 @@ std::pair<double, double> operator/(const std::pair<double, double> p1, const st
     return std::make_pair(p1.first / p2.first, p1.second / p2.second);
 }
 
+std::pair<double, double> operator*(const std::pair<double, double> p1, const std::pair<double, double> p2)
+{
+    return std::make_pair(p1.first * p2.first, p1.second * p2.second);
+}
+
 std::pair<double, double>& operator/=(std::pair<double, double>& self, const double d)
 {
     self.first  /= d;

@@ -237,6 +237,7 @@ void InfomapBase::run(const std::map<unsigned int, unsigned int>& clusterIds)
 	if (!clusterIds.empty()) {
 		Log() << "  -> " << clusterIds.size() << " cluster ids provided\n";
 	}
+
 	// Log() << "  -> Use " << (this->isUndirected()? "undirected" : "directed") << " flow";
 	// if (this->useTeleportation())
 	// 	Log() << " with " << (this->recordedTeleportation ? "recorded" : "unrecorded") << " teleportation to " <<
@@ -327,7 +328,7 @@ void InfomapBase::run(Network& network, const std::map<unsigned int, unsigned in
 		this->minBipartiteNodeIndex = network.bipartiteStartId();
 	}
 
-	initNetwork(network);
+	initNetwork(network, this->hybrid);
 
 	if (numLeafNodes() == 0)
 		throw DataDomainError("No nodes to partition");
@@ -439,7 +440,7 @@ InfomapBase& InfomapBase::initMetaData(std::string metaDataFile)
 	return *this;
 }
 
-InfomapBase& InfomapBase::initNetwork(Network& network)
+InfomapBase& InfomapBase::initNetwork(Network& network, double alpha)
 {
 	if (network.numNodes() == 0)
 		throw DataDomainError("No nodes in network");
@@ -448,7 +449,7 @@ InfomapBase& InfomapBase::initNetwork(Network& network)
 		root().deleteChildren();
 		m_leafNodes.clear();
 	}
-	generateSubNetwork(network);
+	generateSubNetwork(network, alpha);
 
 	initOptimizer();
 
@@ -456,9 +457,9 @@ InfomapBase& InfomapBase::initNetwork(Network& network)
 	return *this;
 }
 
-InfomapBase& InfomapBase::initNetwork(NodeBase& parent, bool asSuperNetwork)
+InfomapBase& InfomapBase::initNetwork(NodeBase& parent, bool asSuperNetwork, double alpha)
 {
-	generateSubNetwork(parent);
+	generateSubNetwork(parent, alpha);
 
 	if (asSuperNetwork)
 		transformNodeFlowToEnterFlow(root());
@@ -684,7 +685,7 @@ InfomapBase& InfomapBase::initPartition(std::vector<unsigned int>& modules, bool
 	return *this;
 }
 
-void InfomapBase::generateSubNetwork(Network& network)
+void InfomapBase::generateSubNetwork(Network& network, double alpha)
 {
 	if(this->isIntegerFlow()) {
 		m_root->setFlow({ network.numNodes(), network.numNodes() });
@@ -704,8 +705,8 @@ void InfomapBase::generateSubNetwork(Network& network)
 	m_leafNodes.reserve(numNodes);
 	std::pair<double, double> sumNodeFlow = { 0.0, 0.0 };
 	std::map<unsigned int, unsigned int> nodeIndexMap;
-    Log() << "[DEBUG] markov time: " << this->markovTime << "\n";
-    Log() << "[DEBUG] right nodes starting at " << getConfig().minBipartiteNodeIndex << "\n";
+    // Log() << "[DEBUG] markov time: " << this->markovTime << "\n";
+    // Log() << "[DEBUG] right nodes starting at " << getConfig().minBipartiteNodeIndex << "\n";
 	for (auto& nodeIt : network.nodes()) {
 		auto& networkNode = nodeIt.second;
 		//if (this->isIntegerFlow())
@@ -714,10 +715,10 @@ void InfomapBase::generateSubNetwork(Network& network)
 
 		// ToDo[chris]: what should this be?
 		std::pair<double, double> f = (networkNode.physicalId < getConfig().minBipartiteNodeIndex)
-		        ? std::make_pair(networkNode.flow, 0.0)
-		        : std::make_pair(0.0, networkNode.flow)
+		        ? std::make_pair((1-alpha) * networkNode.flow, alpha * networkNode.flow)
+		        : std::make_pair(alpha * networkNode.flow, (1-alpha) * networkNode.flow)
 		        ;
-		Log() << "[DEBUG] node " << networkNode.id << ", flow: (" << f.first << ", " << f.second << ")\n";
+		// Log() << "[DEBUG] node " << networkNode.id << ", flow: (" << f.first << ", " << f.second << ")\n";
 		NodeBase* node = new Node<FlowData>(f, networkNode.id, networkNode.physicalId, networkNode.layerId);
 
 		if (this->haveMetaData()) {
@@ -790,7 +791,7 @@ void InfomapBase::generateSubNetwork(Network& network)
 	}
 }
 
-void InfomapBase::generateSubNetwork(NodeBase& parent)
+void InfomapBase::generateSubNetwork(NodeBase& parent, double alpha)
 {
 	// Store parent module
 	root().owner = &parent;
@@ -834,7 +835,7 @@ void InfomapBase::init()
 	Log(3) << "InfomapBase::init()..." << std::endl;
 
 	if (m_calculateEnterExitFlow && isMainInfomap())
-		initEnterExitFlow();
+		initEnterExitFlow(getConfig().hybrid);
 
 	initNetwork();
 
@@ -860,7 +861,7 @@ void InfomapBase::hierarchicalPartition()
 {
 	Log(1) << "Hierarchical partition..." << std::endl;
 
-	partition();
+    partition();
 
 	if (numTopModules() == 1 || numTopModules() == numLeafNodes()) {
 		Log(1) << "Trivial partition, skip search for hierarchical solution.\n";
@@ -995,9 +996,9 @@ void InfomapBase::partition()
 		// Calculate individual module codelengths and store on the modules
 		calcCodelengthOnTree(false);
 		root().codelength = getIndexCodelength();
-		m_hierarchicalCodelength = getCodelength();
-	}
-	m_hierarchicalCodelength = calcCodelengthOnTree(true);
+		// m_hierarchicalCodelength = getCodelength();
+        m_hierarchicalCodelength = calcCodelengthOnTree(true);
+    }
 }
 
 
@@ -1032,7 +1033,7 @@ void InfomapBase::restoreHardPartition()
 // Run: Init: *
 // ===================================================
 
-void InfomapBase::initEnterExitFlow()
+void InfomapBase::initEnterExitFlow(double alpha)
 {
 	// Calculate enter/exit
 	for (auto* n : m_leafNodes) {
@@ -1053,6 +1054,7 @@ void InfomapBase::initEnterExitFlow()
         }
     }
     else {
+        Log() << "[DEBUG] initEnterExitFlow with alpha=" << alpha << ")\n";
         for (auto *n : m_leafNodes) {
             for (EdgeType *e : n->outEdges()) {
                 EdgeType &edge = *e;
@@ -1063,17 +1065,29 @@ void InfomapBase::initEnterExitFlow()
                 // double halfFlow = edge.data.flow;
                 if (edge.source.physicalId < getConfig().minBipartiteNodeIndex)
                 {
-                    edge.source.addEnterFlow(zeroLeft(edge.data.flow));
-                    edge.source.addExitFlow(zeroRight(edge.data.flow));
-                    edge.target.addEnterFlow(zeroRight(edge.data.flow));
-                    edge.target.addExitFlow(zeroLeft(edge.data.flow));
-                }
-                else
-                {
+                    /*
                     edge.source.addEnterFlow(zeroRight(edge.data.flow));
                     edge.source.addExitFlow(zeroLeft(edge.data.flow));
                     edge.target.addEnterFlow(zeroLeft(edge.data.flow));
                     edge.target.addExitFlow(zeroRight(edge.data.flow));
+                    */
+                    edge.source.addEnterFlow(std::make_pair(1-alpha, alpha) * edge.data.flow);
+                    edge.source.addExitFlow(std::make_pair(alpha, 1-alpha) * edge.data.flow);
+                    edge.target.addEnterFlow(std::make_pair(alpha, 1-alpha) * edge.data.flow);
+                    edge.target.addExitFlow(std::make_pair(1-alpha, alpha) * edge.data.flow);
+                }
+                else
+                {
+                    /*
+                    edge.source.addEnterFlow(zeroLeft(edge.data.flow));
+                    edge.source.addExitFlow(zeroRight(edge.data.flow));
+                    edge.target.addEnterFlow(zeroRight(edge.data.flow));
+                    edge.target.addExitFlow(zeroLeft(edge.data.flow));
+                     */
+                    edge.source.addEnterFlow(std::make_pair(alpha, 1-alpha) * edge.data.flow);
+                    edge.source.addExitFlow(std::make_pair(1-alpha, alpha) * edge.data.flow);
+                    edge.target.addEnterFlow(std::make_pair(1-alpha, alpha) * edge.data.flow);
+                    edge.target.addExitFlow(std::make_pair(alpha, 1-alpha) * edge.data.flow);
                 }
 
                 //Log() << "[DEBUG] edge source enter (" << edge.source.getEnterFlow().first << ", " << edge.source.getEnterFlow().second << ")\n";
@@ -1158,7 +1172,7 @@ void InfomapBase::findTopModulesRepeatedly(unsigned int maxLevels)
 		// Log() << "{{ INIT TIME: " << timer.getElapsedTimeInMilliSec() << "ms }} ";
 		// timer.start();
 		// Core loop, merging modules
-		unsigned int numOptimizationLoops = optimizeActiveNetwork();
+        unsigned int numOptimizationLoops = optimizeActiveNetwork();
 
 		Log(1,2) << numOptimizationLoops << ", " << std::flush;
 		Log(3) << "done! -> codelength " << *this << " in " << numActiveModules() << " modules." << std::endl;
@@ -1213,7 +1227,7 @@ unsigned int InfomapBase::fineTune()
 	Log(3) << " -> moved to codelength " << *this << " in " << numActiveModules() << " existing modules. Try tuning..." << std::endl;
 
 	// Continue to optimize from there to tune leaf nodes
-	unsigned int numEffectiveLoops = optimizeActiveNetwork();
+    unsigned int numEffectiveLoops = optimizeActiveNetwork();
 	if (numEffectiveLoops == 0) {
 		restoreConsolidatedOptimizationPointIfNoImprovement();
 		Log(4) << "Fine-tune didn't improve solution, restoring last.\n";
@@ -1308,7 +1322,7 @@ unsigned int InfomapBase::coarseTune()
 
 	Log(4) << "Tune sub-modules from codelength " << *this << " in " << numActiveModules() << " modules... " << std::endl;
 	// Continue to optimize from there to tune sub-modules
-	unsigned int numEffectiveLoops = optimizeActiveNetwork();
+    unsigned int numEffectiveLoops = optimizeActiveNetwork();
 	Log(4) << "Tuned sub-modules in " << numEffectiveLoops << " effective loops to codelength " << *this <<
 			" in " << numActiveModules() << " modules." << std::endl;
 	consolidateModules(true);
@@ -1370,8 +1384,7 @@ unsigned int InfomapBase::findHierarchicalSuperModulesFast(unsigned int superLev
 
 		initPartition();
 
-		unsigned int numEffectiveLoops = optimizeActiveNetwork();
-
+        unsigned int numEffectiveLoops = optimizeActiveNetwork();
 		double codelength = getCodelength();
 		double indexCodelength = getIndexCodelength();
 		unsigned int numSuperModules = numActiveModules();

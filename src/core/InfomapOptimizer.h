@@ -627,7 +627,7 @@ unsigned int InfomapOptimizer<Objective>::tryMoveEachNodeIntoBestModule()
 			auto& edge = *e;
 			NodeBase& neighbour = edge.target;
 			// deltaFlow[neighbour.index] += DeltaFlowDataType(neighbour.index, edge.data.flow, 0);
-			deltaFlow.add(neighbour.index, DeltaFlowDataType(neighbour.index, edge.data.flow, { 0.0, 0.0}));
+			deltaFlow.add(neighbour.index, DeltaFlowDataType(neighbour.index, edge.data.flow, { 0.0, 0.0 }));
 		}
 		// For all inlinks
 		for (auto& e : current.inEdges())
