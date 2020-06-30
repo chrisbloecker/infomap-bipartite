@@ -82,7 +82,7 @@ struct Config
 	double weightThreshold = 0.0;
 	bool unweightedPaths = false;
 	unsigned int pathMarkovOrder = 1;
-	bool bipartite = false;
+	bool bipartite = true;
 	double hybrid = 0.0;
 	bool skipAdjustBipartiteFlow = false;
 	bool hardPartitions = false;
@@ -115,7 +115,7 @@ struct Config
 	double markovTime = 1.0;
 	double multilayerRelaxRate = 0.15;
 	int multilayerRelaxLimit = -1;
-	
+
 	// Clustering
 	bool twoLevel = false;
 	bool noCoarseTune = false;
